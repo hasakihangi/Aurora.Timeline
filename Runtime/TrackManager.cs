@@ -6,16 +6,30 @@ namespace Aurora.Timeline
 {
     public class TrackManager: MonoBehaviour
     {
-        public static TrackManager Instance {get; private set;}
-        public void Init()
+        private static TrackManager _instance;
+
+        public static TrackManager Instance
         {
-            Instance = this;
+            get
+            {
+                if (_instance is null)
+                {
+                    // 为_instance赋值之后, 返回
+                    _instance = FindObjectOfType<TrackManager>();
+
+                    if (_instance is null)
+                    {
+                        GameObject obj = new GameObject("TrackManager");
+                        _instance = obj.AddComponent<TrackManager>();
+                        DontDestroyOnLoad(obj);
+                    }
+                }
+
+                return _instance;
+            }
         }
 
-        private void OnEnable()
-        {
-            Instance = this;
-        }
+
 
         public List<Track> tracks = new List<Track>();
         public float m_Rate = 1f;
