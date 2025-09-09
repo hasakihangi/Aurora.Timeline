@@ -139,6 +139,9 @@ namespace Aurora.Timeline
 
         public void Group(IEnumerable<TimelineNode> nodes)
         {
+            if (nodes == null)
+                return;
+
             foreach (var node in nodes)
             {
                 Group(node);
