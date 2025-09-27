@@ -7,30 +7,100 @@ using System.Linq;
 namespace Aurora.Timeline
 {
     // 可以分为数据部分和运行时部分, 数据部分 struct 可以重复使用
+    // 依然在node这一层进行组织安排, 只要指出最后是哪一点
+    // todo: struct包装
     public class TimelineNode
     {
         public TimelineNodeMethod method;
-        public float m_Elapsed = 0f;
+        public float _elapsed = 0f;
         public List<TimelineNode> next = new List<TimelineNode>();
         public float nodeRate = 1f;
-        public Action onDone;
         public string name = string.Empty;
+
+        // public Action onDone;
+        private Action<TimelineNode> _onComplete;
+        private object _callback;
+        private object _target;
 
         public bool Update(float delta, float rate)
         {
             float actualDelta = delta * nodeRate;
 
-            bool done = method == null || method(actualDelta, m_Elapsed, rate * nodeRate);
+            bool done = method == null || method(actualDelta, _elapsed, rate * nodeRate);
 
-            m_Elapsed += actualDelta;
+            _elapsed += actualDelta;
 
-            if (done && onDone != null)
+            if (done && _onComplete != null)
             {
-                onDone.Invoke();
-                onDone = null;
+                _onComplete.Invoke(this);
+                _onComplete = null;
+                _callback = null;
+                _target = null;
             }
 
             return done;
+        }
+
+        // public Action OnComplete
+        // {
+        //     set()
+        // }
+
+        public Action OnDone
+        {
+            set
+            {
+                if (value == null)
+                {
+                    _onComplete = null;
+                    return;
+                }
+
+                _callback = value;
+                _onComplete = node =>
+                {
+                    var callback = node._callback as Action;
+                    callback.Invoke();
+                };
+            }
+        }
+
+        // null的逻辑?
+        // primeTween的逻辑是如果为null就不赋值? 如果为null应该是取消所有的赋值
+        // onComplete的赋值和callback的赋值应该是保持同步的
+        public void OnComplete(Action action)
+        {
+            if (action == null)
+            {
+                _onComplete = null;
+                return;
+            }
+
+            _callback = action;
+            _onComplete = node =>
+            {
+                var callback = node._callback as Action;
+                callback.Invoke();
+            };
+        }
+
+        public void OnComplete<T>(T target, Action<T> action) where T: class
+        {
+            if (action == null)
+            {
+                _onComplete = null;
+                return;
+            }
+
+            _callback = action;
+            _target = target;
+
+            _onComplete = node =>
+            {
+                var callback = node._callback as Action<T>;
+                var t = _target as T;
+                callback.Invoke(t);
+            };
         }
 
         public void AddToNext(TimelineNode node)
@@ -76,13 +146,30 @@ namespace Aurora.Timeline
             }
         );
 
+        // 有必要改成CompleteAction的命名吗?
+        // Done这个命名是否合适?
         public static TimelineNode DoneAction(Action action)
         {
             TimelineNode node = TimelineNode.Get();
-            node.onDone = action;
+            node.OnComplete(action);
             return node;
         }
 
+        public static TimelineNode DoneAction<T>(T target, Action<T> action) where T: class
+        {
+            TimelineNode node = TimelineNode.Get();
+            node.OnComplete<T>(target, action);
+            return node;
+        }
+
+        // 确实要捕获局部变量
+        // 或者onDone这个本身就是带有一个参数的,
+        // 如果要支持这样一个带参数的重载以减少gc, 可以怎么写?
+        // 不是很好写, 可以参考primeTween的方案
+        // public static TimelineNode DoneAction<T>(Action<T> action)
+        // {
+
+        // }
 
         public static TimelineNode Delay(float seconds, Action callback)
         {
@@ -169,7 +256,7 @@ namespace Aurora.Timeline
 
         public void Clear()
         {
-            onDone?.Invoke();
+            _onComplete?.Invoke(this);
             next.Clear();
         }
 
@@ -180,18 +267,16 @@ namespace Aurora.Timeline
             return node;
         }
 
-        public static TimelineNode Get(Action onDoneAction)
+        public static TimelineNode Get(Action doneAction)
         {
-            TimelineNode node = Get();
-            node.onDone = onDoneAction;
-            return node;
+            return TimelineNode.DoneAction(doneAction);
         }
 
-        public static TimelineNode Get(TimelineNodeMethod method, Action onDoneAction)
+        public static TimelineNode Get(TimelineNodeMethod method, Action doneAction)
         {
             TimelineNode node = Get();
             node.method = method;
-            node.onDone = onDoneAction;
+            node.OnComplete(doneAction);
             return node;
         }
 
@@ -204,8 +289,4 @@ namespace Aurora.Timeline
     }
 
     public delegate bool TimelineNodeMethod(float delta, float elapsed, float rate);
-
-//
-// public delegate void TimelineNodeDebugMethod(TimelineNode node)
-// 目前就用node, 能做到
 }

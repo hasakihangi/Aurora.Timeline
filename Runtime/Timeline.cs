@@ -5,6 +5,7 @@ using UnityEngine;
 namespace Aurora.Timeline
 {
     // ParallelNode需要有Join Timeline和TimelineNode的能力
+    //
     [Serializable]
     public class Timeline: ParallelNode
     {
@@ -183,6 +184,14 @@ namespace Aurora.Timeline
         public static Timeline Get()
         {
             return new Timeline();
+        }
+
+        public static Timeline Get(Action action)
+        {
+            Timeline timeline = Get();
+            TimelineNode node = TimelineNode.Get(action);
+            timeline.Append(node);
+            return timeline;
         }
 
         public static Timeline Get(TimelineNode node)
