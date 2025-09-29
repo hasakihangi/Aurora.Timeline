@@ -111,6 +111,12 @@ namespace Aurora.Timeline
             next.Add(node);
         }
 
+        public void AddToNext(Action action)
+        {
+            TimelineNode node = TimelineNode.DoneAction(action);
+            AddToNext(node);
+        }
+
         public void AddToNext(IEnumerable<TimelineNode> nodes)
         {
             if (nodes == null)
