@@ -223,5 +223,20 @@ namespace Aurora.Timeline
         {
             return ArrangeInOrder(timelines as IEnumerable<Timeline>);
         }
+
+        // 是否可以写一个方法, 让params参数可以同时传入TimelineNode或者Timeline其中一种类型的对象
+        // 只能自己用struct写一个类似于union的东西
+        // [StructLayout(LayoutKind.Explicit)]
+        // public struct TimelineUnion
+        // {
+        //     [FieldOffset(0)]
+        //     public TimelineNode Node;
+        //
+        //     [FieldOffset(0)]
+        //     public Timeline Timeline;
+        //
+        //     [FieldOffset(8)] // 根据引用大小调整
+        //     public int TypeFlag; // 0=Node, 1=Timeline
+        // }
     }
 }

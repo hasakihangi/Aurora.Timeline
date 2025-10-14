@@ -187,12 +187,12 @@ namespace Aurora.Timeline
         }
 
 
-        public static TimelineNode ArrangeNodesInOrder(params TimelineNode[] nodes)
+        public static TimelineNode ArrangeInOrder(params TimelineNode[] nodes)
         {
-            return ArrangeNodesInOrder(nodes as IEnumerable<TimelineNode>);
+            return ArrangeInOrder(nodes as IEnumerable<TimelineNode>);
         }
 
-        public static TimelineNode ArrangeNodesInOrder(IEnumerable<TimelineNode> nodes)
+        public static TimelineNode ArrangeInOrder(IEnumerable<TimelineNode> nodes)
         {
             TimelineNode first = null;
             TimelineNode node = null;
@@ -215,7 +215,7 @@ namespace Aurora.Timeline
             return first;
         }
 
-        public static TimelineNode ArrangeNodesInOrder(IEnumerable<TimelineNode> nodes, float interval)
+        public static TimelineNode ArrangeInOrder(IEnumerable<TimelineNode> nodes, float interval)
         {
             if (nodes == null) return null;
 
