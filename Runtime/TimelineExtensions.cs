@@ -27,6 +27,13 @@ namespace Aurora.Timeline
             return t;
         }
 
+        public static Timeline Append(this Timeline t, TimelineNodeMethod method)
+        {
+            TimelineNode node = TimelineNode.Get(method);
+            t.Append(node);
+            return t;
+        }
+
         public static Timeline Append(this Timeline t, params Timeline[] timelines)
         {
             t.Chain(timelines);
@@ -39,6 +46,14 @@ namespace Aurora.Timeline
             t.Append(doneNode);
             return t;
         }
+
+        public static Timeline Join(this Timeline t, Action doneAction)
+        {
+            TimelineNode node = TimelineNode.DoneAction(doneAction);
+            t.Group(node);
+            return t;
+        }
+
 
         public static Timeline Join(this Timeline t, TimelineNode node)
         {
