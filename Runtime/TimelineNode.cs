@@ -168,6 +168,11 @@ namespace Aurora.Timeline
             return node;
         }
 
+        public static implicit operator TimelineNode(Action action)
+        {
+            return DoneAction(action);
+        }
+
         // 确实要捕获局部变量
         // 或者onDone这个本身就是带有一个参数的,
         // 如果要支持这样一个带参数的重载以减少gc, 可以怎么写?
