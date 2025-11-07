@@ -74,5 +74,28 @@ namespace Aurora.Timeline
             return group;
         }
 
+        //现在需要的是Delay多少秒之后执行一个Timeline
+        public static Timeline GroupDelay(this Timeline t, float seconds, Timeline afterDelay)
+        {
+            Timeline timeline = Timeline.Get();
+            TimelineNode delayNode = TimelineNode.Delay(seconds);
+            timeline.Append(delayNode).Append(afterDelay);
+            t.Group(timeline);
+            return t;
+        }
+
+        public static Timeline GroupDelay(this Timeline t, float seconds, TimelineNode afterDelay)
+        {
+            TimelineNode node = TimelineNode.Delay(seconds);
+            node.AddToNext(afterDelay);
+            t.Group(node);
+            return t;
+        }
+
+        public static Timeline AppendDelay(this Timeline t, float seconds)
+        {
+            TimelineNode node = TimelineNode.Delay(seconds);
+            return t.Append(node);
+        }
     }
 }

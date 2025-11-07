@@ -182,6 +182,13 @@ namespace Aurora.Timeline
 
         // }
 
+        public static TimelineNode Delay(float seconds)
+        {
+            TimelineNode node = Get(
+                (delta, elapsed, rate) => elapsed >= seconds);
+            return node;
+        }
+
         public static TimelineNode Delay(float seconds, Action callback)
         {
             TimelineNode node = Get(
