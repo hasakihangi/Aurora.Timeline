@@ -224,7 +224,7 @@ namespace Aurora.Timeline
                 }
             }
 
-            return first;
+            return first ?? Nothing;
         }
 
         public static TimelineNode ArrangeInOrder(IEnumerable<TimelineNode> nodes, float interval)
