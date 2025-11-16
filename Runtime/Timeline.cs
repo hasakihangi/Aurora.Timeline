@@ -209,10 +209,7 @@ namespace Aurora.Timeline
             {
                 foreach (var timeline in timelines)
                 {
-                    if (timeline != null)
-                    {
-                        result.Chain(timeline);
-                    }
+                    result.Chain(timeline);
                 }
             }
 

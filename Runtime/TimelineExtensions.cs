@@ -14,15 +14,21 @@ namespace Aurora.Timeline
             TrackManager.Instance.Unregister(track);
         }
 
-        public static Timeline Append(this Timeline timeline, TimelineNode node)
+        public static Timeline Append(this Timeline t, TimelineNode node)
         {
-            timeline.Chain(node);
-            return timeline;
+            if (t == null)
+                t = Timeline.Get();
+
+            t.Chain(node);
+            return t;
         }
 
 
         public static Timeline Append(this Timeline t, Timeline timeline)
         {
+            if (t == null)
+                t = Timeline.Get();
+
             t.Chain(timeline);
             return t;
         }
@@ -30,12 +36,14 @@ namespace Aurora.Timeline
         public static Timeline Append(this Timeline t, TimelineNodeMethod method)
         {
             TimelineNode node = TimelineNode.Get(method);
-            t.Append(node);
-            return t;
+            return Append(t, node);
         }
 
         public static Timeline Append(this Timeline t, params Timeline[] timelines)
         {
+            if (t == null)
+                t = Timeline.Get();
+
             t.Chain(timelines);
             return t;
         }
@@ -43,26 +51,26 @@ namespace Aurora.Timeline
         public static Timeline Append(this Timeline t, Action doneAction)
         {
             TimelineNode doneNode = TimelineNode.DoneAction(doneAction);
-            t.Append(doneNode);
-            return t;
+            return Append(t, doneNode);
         }
 
         public static Timeline Join(this Timeline t, Action doneAction)
         {
             TimelineNode node = TimelineNode.DoneAction(doneAction);
-            t.Group(node);
-            return t;
+            return Join(t, node);
         }
 
 
         public static Timeline Join(this Timeline t, TimelineNode node)
         {
+            t ??= Timeline.Get();
             t.Group(node);
             return t;
         }
 
         public static Timeline Join(this Timeline t, Timeline timeline)
         {
+            t ??= Timeline.Get();
             t.Group(timeline);
             return t;
         }
@@ -72,6 +80,12 @@ namespace Aurora.Timeline
             NodeGroup group = NodeGroup.Get();
             group.Parallel(n);
             return group;
+        }
+
+        public static Timeline ToTimeline(this TimelineNode n)
+        {
+            Timeline timeline = Timeline.Get(n);
+            return timeline;
         }
 
         //现在需要的是Delay多少秒之后执行一个Timeline
