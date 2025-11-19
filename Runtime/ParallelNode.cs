@@ -1,9 +1,7 @@
 using System.Collections.Generic;
 
-// 经常更改的Gameplay部分不搞缓存池
 namespace Aurora.Timeline
 {
-    // 指定哪一个算完成?
     public abstract class ParallelNode
     {
         protected List<ParallelNode> parallelNodes = new List<ParallelNode>();

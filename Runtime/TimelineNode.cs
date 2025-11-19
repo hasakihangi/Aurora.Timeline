@@ -6,27 +6,31 @@ using System.Linq;
 
 namespace Aurora.Timeline
 {
-    // 可以分为数据部分和运行时部分, 数据部分 struct 可以重复使用
-    // 依然在node这一层进行组织安排, 只要指出最后是哪一点
     // todo: struct包装
     public class TimelineNode
     {
-        public TimelineNodeMethod method;
+        public TimelineNodeMethod _method;
         public float _elapsed = 0f;
-        public List<TimelineNode> next = new List<TimelineNode>();
-        public float nodeRate = 1f;
-        public string name = string.Empty;
+        public List<TimelineNode> _next = new List<TimelineNode>();
+        public float _nodeRate = 1f;
+        public string _name = string.Empty;
 
-        // public Action onDone;
         private Action<TimelineNode> _onComplete;
         private object _callback;
         private object _target;
 
+        public string[] _tags = Array.Empty<string>();
+
+        public bool IsMatchTag(string tag)
+        {
+            return Utils.Contains(_tags, tag);
+        }
+
         public bool Update(float delta, float rate)
         {
-            float actualDelta = delta * nodeRate;
+            float actualDelta = delta * _nodeRate;
 
-            bool done = method == null || method(actualDelta, _elapsed, rate * nodeRate);
+            bool done = _method == null || _method(actualDelta, _elapsed, rate * _nodeRate);
 
             _elapsed += actualDelta;
 
@@ -41,10 +45,6 @@ namespace Aurora.Timeline
             return done;
         }
 
-        // public Action OnComplete
-        // {
-        //     set()
-        // }
 
         public Action OnDone
         {
@@ -108,7 +108,7 @@ namespace Aurora.Timeline
             if (node == null)
                 return;
 
-            next.Add(node);
+            _next.Add(node);
         }
 
         public void AddToNext(Action action)
@@ -133,7 +133,7 @@ namespace Aurora.Timeline
             get
             {
                 TimelineNode nothing = TimelineNode.Get();
-                nothing.name = "nothing";
+                nothing._name = "nothing";
                 return nothing;
             }
         }
@@ -141,7 +141,7 @@ namespace Aurora.Timeline
         public static TimelineNode WaitSeconds(float sec)
         {
             TimelineNode node = Get((delta, elapsed, rate) => elapsed >= sec);
-            node.name = "wait secondes";
+            node._name = "wait secondes";
             return node;
         }
 
@@ -194,7 +194,7 @@ namespace Aurora.Timeline
             TimelineNode node = Get(
                 (delta, elapsed, rate) => elapsed >= seconds,
                 callback);
-            node.name = "delay onDoneAction";
+            node._name = "delay onDoneAction";
             return node;
         }
 
@@ -275,13 +275,13 @@ namespace Aurora.Timeline
         public void Clear()
         {
             _onComplete?.Invoke(this);
-            next.Clear();
+            _next.Clear();
         }
 
         public static TimelineNode Get(TimelineNodeMethod method)
         {
             TimelineNode node = Get();
-            node.method = method;
+            node._method = method;
             return node;
         }
 
@@ -293,7 +293,7 @@ namespace Aurora.Timeline
         public static TimelineNode Get(TimelineNodeMethod method, Action doneAction)
         {
             TimelineNode node = Get();
-            node.method = method;
+            node._method = method;
             node.OnComplete(doneAction);
             return node;
         }

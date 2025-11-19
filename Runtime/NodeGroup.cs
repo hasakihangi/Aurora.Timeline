@@ -14,6 +14,17 @@ namespace Aurora.Timeline
             return parallelDone && nodesDone;
         }
 
+        public IEnumerable<TimelineNode> FindNodes(string tag)
+        {
+            for (int i = nodes.Count - 1; i >= 0; i--)
+            {
+                if (nodes[i].IsMatchTag(tag))
+                {
+                    yield return nodes[i];
+                }
+            }
+        }
+
         private bool UpdateNodes(float delta, float rate)
         {
             for (int i = nodes.Count - 1; i >= 0; i--)
@@ -22,9 +33,9 @@ namespace Aurora.Timeline
                 if (current.Update(delta, rate))
                 {
                     nodes.RemoveAt(i);
-                    if (current.next.Count > 0)
+                    if (current._next.Count > 0)
                     {
-                        nodes.AddRange(current.next);
+                        nodes.AddRange(current._next);
                     }
                 }
             }
