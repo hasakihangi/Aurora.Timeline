@@ -7,6 +7,7 @@ using System.Linq;
 namespace Aurora.Timeline
 {
     // todo: struct包装
+    [System.Serializable]
     public class TimelineNode
     {
         public TimelineNodeMethod _method;
@@ -192,8 +193,8 @@ namespace Aurora.Timeline
         public static TimelineNode Delay(float seconds, Action callback)
         {
             TimelineNode node = Get(
-                (delta, elapsed, rate) => elapsed >= seconds,
-                callback);
+                (delta, elapsed, rate) => elapsed >= seconds);
+            node.OnDone = callback;
             node._name = "delay onDoneAction";
             return node;
         }
@@ -290,17 +291,16 @@ namespace Aurora.Timeline
             return TimelineNode.DoneAction(doneAction);
         }
 
-        public static TimelineNode Get(TimelineNodeMethod method, Action doneAction)
-        {
-            TimelineNode node = Get();
-            node._method = method;
-            node.OnComplete(doneAction);
-            return node;
-        }
-
         public static TimelineNode Get()
         {
             return new TimelineNode();
+        }
+
+        public static TimelineNode Get(string name)
+        {
+            var n = new TimelineNode();
+            n._name = name;
+            return n;
         }
 
         private TimelineNode() {}

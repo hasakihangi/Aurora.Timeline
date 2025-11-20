@@ -1,17 +1,30 @@
 
 using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
 
 namespace Aurora.Timeline
 {
+    [System.Serializable]
     public class NodeGroup: ParallelNode
     {
-        private List<TimelineNode> nodes = new List<TimelineNode>();
+        [SerializeField] public List<TimelineNode> nodes = new List<TimelineNode>();
 
         public override bool Update(float delta, float rate)
         {
             bool parallelDone = UpdateParallel(delta, rate);
             bool nodesDone = UpdateNodes(delta, rate);
             return parallelDone && nodesDone;
+        }
+
+        public override string ToString(int level)
+        {
+            string output = new string('\t', level);
+            for (int i = 0; i < nodes.Count; i++)
+            {
+                output += $"{i}:{nodes[i]._name}  ";
+            }
+            return output;
         }
 
         public IEnumerable<TimelineNode> FindNodes(string tag)

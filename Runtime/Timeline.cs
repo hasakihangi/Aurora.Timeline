@@ -4,34 +4,41 @@ using UnityEngine;
 
 namespace Aurora.Timeline
 {
+    // 加一个按钮可以用于Debug目前在Track里面的Timeline?
+    // 用List确实是比较好的, 维护一个index
+    // 然后就是自己实现一个双端队列
     [Serializable]
     public class Timeline: ParallelNode
     {
-        private LinkedList<ParallelNode> orderNodes = new LinkedList<ParallelNode>();
+        // 为什么是LinkedList? 有这个必要吗? 因为是从前往后? 先进先出? 为什么不适用Queue呢?
+        private LinkedList<ParallelNode> _orderNodes = new LinkedList<ParallelNode>();
+        // private Queue<ParallelNode> orderNodes = new Queue<ParallelNode>();
 
-        public float m_Rate = 1;
+        public float _rate = 1;
 
-        public string name = string.Empty;
+        public string _name = string.Empty;
 
         public override bool Update(float delta, float rate)
         {
-            bool parallelDone = UpdateParallel(delta * m_Rate, rate * m_Rate);
-            bool orderDone = UpdateOrder(delta * m_Rate, rate * m_Rate);
+            bool parallelDone = UpdateParallel(delta * _rate, rate * _rate);
+            bool orderDone = UpdateOrder(delta * _rate, rate * _rate);
             return parallelDone && orderDone;
         }
 
         public bool UpdateOrder(float delta, float rate)
         {
-            LinkedListNode<ParallelNode> node = orderNodes.First;
+            LinkedListNode<ParallelNode> node = _orderNodes.First;
+            // orderNodes.TryPeek() // 如果是队列的话, Peek的是哪边? 队列如果对比List, index小的那边是首还是大的那边是首? Peek的是最早加入的还是最晚加入的
+            // 队列适合访问到最早加入的元素, 栈适合访问到最晚加入的元素
 
             if (node == null)
                 return true;
 
             ParallelNode value =node.Value;
 
-            if (value.Update(m_Rate * delta, m_Rate * rate))
+            if (value.Update(_rate * delta, _rate * rate))
             {
-                orderNodes.RemoveFirst();
+                _orderNodes.RemoveFirst();
             }
 
             return false;
@@ -39,7 +46,7 @@ namespace Aurora.Timeline
 
         public IEnumerable<TimelineNode> FindNodes(string tag)
         {
-            foreach (var parallelNode in orderNodes)
+            foreach (var parallelNode in _orderNodes)
             {
                 if (parallelNode is NodeGroup nodeGroup)
                 {
@@ -62,6 +69,18 @@ namespace Aurora.Timeline
                 group.Parallel(node);
                 parallelNodes.Add(group);
             }
+        }
+
+        // 为什么没有显示t2?
+        public override string ToString(int level)
+        {
+            string output = new string('\t', level) + "timeline " + $"{_name}" + '\n';
+            level++;
+            foreach (var orderNode in _orderNodes)
+            {
+                output += orderNode.ToString(level) + '\n';
+            }
+            return output;
         }
 
         public void Parallel(params TimelineNode[] nodes)
@@ -94,7 +113,7 @@ namespace Aurora.Timeline
             {
                 NodeGroup group = NodeGroup.Get();
                 group.Parallel(node);
-                orderNodes.AddLast(group);
+                _orderNodes.AddLast(group);
             }
         }
 
@@ -115,7 +134,7 @@ namespace Aurora.Timeline
         {
             if (timeline != null)
             {
-                orderNodes.AddLast(timeline);
+                _orderNodes.AddLast(timeline);
             }
         }
 
@@ -131,7 +150,7 @@ namespace Aurora.Timeline
         {
             if (node != null)
             {
-                orderNodes.AddLast(node);
+                _orderNodes.AddLast(node);
             }
         }
 
@@ -140,9 +159,9 @@ namespace Aurora.Timeline
             if (node != null)
             {
                 // 为什么是Last? Join是编排方法, 只对Last生效
-                if (orderNodes.Last != null)
+                if (_orderNodes.Last != null)
                 {
-                    orderNodes.Last.Value.Parallel(node);
+                    _orderNodes.Last.Value.Parallel(node);
                 }
                 else
                 {
@@ -171,9 +190,9 @@ namespace Aurora.Timeline
         {
             if (node != null)
             {
-                if (orderNodes.Last != null)
+                if (_orderNodes.Last != null)
                 {
-                    orderNodes.Last.Value.Parallel(node);
+                    _orderNodes.Last.Value.Parallel(node);
                 }
                 else
                 {
@@ -199,12 +218,13 @@ namespace Aurora.Timeline
             return new Timeline();
         }
 
-        public static Timeline Get(Action action)
+        public static Timeline Get(string name)
         {
-            Timeline timeline = Get();
-            TimelineNode node = TimelineNode.Get(action);
-            timeline.Append(node);
-            return timeline;
+            var t = new Timeline
+            {
+                _name = name
+            };
+            return t;
         }
 
         public static Timeline Get(TimelineNode node)
