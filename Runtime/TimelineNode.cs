@@ -261,16 +261,19 @@ namespace Aurora.Timeline
             return first;
         }
 
-        public static TimelineNode ArrangeNodesInParallel(params TimelineNode[] nodes)
+        public static TimelineNode ArrangeNodesInParallel(IEnumerable<TimelineNode> nodes)
         {
-            if (nodes.Length == 0) return null;
             TimelineNode emptyStartNode = Nothing;
             foreach (var node in nodes)
             {
                 emptyStartNode.AddToNext(node);
             }
-
             return emptyStartNode;
+        }
+
+        public static TimelineNode ArrangeNodesInParallel(params TimelineNode[] nodes)
+        {
+            return ArrangeNodesInParallel(nodes as IEnumerable<TimelineNode>);
         }
 
         public void Clear()
