@@ -4,20 +4,16 @@ using UnityEngine;
 
 namespace Aurora.Timeline
 {
-    // 加一个按钮可以用于Debug目前在Track里面的Timeline?
-    // 用List确实是比较好的, 维护一个index
-    // 然后就是自己实现一个双端队列
     [Serializable]
     public class Timeline: ParallelNode
     {
-        // 为什么是LinkedList? 有这个必要吗? 因为是从前往后? 先进先出? 为什么不适用Queue呢?
-        private LinkedList<ParallelNode> _orderNodes = new LinkedList<ParallelNode>();
-        // private Queue<ParallelNode> orderNodes = new Queue<ParallelNode>();
+        // private LinkedList<ParallelNode> _orderNodes = new LinkedList<ParallelNode>();
+        private Dequeue<ParallelNode> _orderNodes = new Dequeue<ParallelNode>();
 
         public float _rate = 1;
-
         public string _name = string.Empty;
 
+        // 为什么是这样写? 同时更新Parallel和order?
         public override bool Update(float delta, float rate)
         {
             bool parallelDone = UpdateParallel(delta * _rate, rate * _rate);
@@ -27,18 +23,21 @@ namespace Aurora.Timeline
 
         public bool UpdateOrder(float delta, float rate)
         {
-            LinkedListNode<ParallelNode> node = _orderNodes.First;
+            ParallelNode node = _orderNodes.PeekFront();
             // orderNodes.TryPeek() // 如果是队列的话, Peek的是哪边? 队列如果对比List, index小的那边是首还是大的那边是首? Peek的是最早加入的还是最晚加入的
             // 队列适合访问到最早加入的元素, 栈适合访问到最晚加入的元素
+            // 为什么当时觉得队列不太行, 需要双端队列? 因为需要查看index大的地方
+            // 只是需要Peek到队列尾部
 
             if (node == null)
                 return true;
 
-            ParallelNode value =node.Value;
+            // ParallelNode value =node.Value;
+            // if (node.)
 
-            if (value.Update(_rate * delta, _rate * rate))
+            if (node.Update(_rate * delta, _rate * rate))
             {
-                _orderNodes.RemoveFirst();
+                _orderNodes.DequeueFront();
             }
 
             return false;
@@ -61,6 +60,11 @@ namespace Aurora.Timeline
             }
         }
 
+        // 不是给预约使用的, 如果有orderNode, 就给orderNode使用, 如果没有orderNode才附加到这上边
+        // 但是如果先附加了Group, 然后Append, 会导致这两个节点一起在使用吗? 感觉像是bug
+        // 需要测试这里的行为
+        // 我怎么感觉语义有部分重复? 更更加优雅的方式吗?
+        // 所以timeline, 只能调用Parallel或者
         public override void Parallel(TimelineNode node)
         {
             if (node != null)
@@ -113,7 +117,7 @@ namespace Aurora.Timeline
             {
                 NodeGroup group = NodeGroup.Get();
                 group.Parallel(node);
-                _orderNodes.AddLast(group);
+                _orderNodes.EnqueueBack(group);
             }
         }
 
@@ -134,7 +138,7 @@ namespace Aurora.Timeline
         {
             if (timeline != null)
             {
-                _orderNodes.AddLast(timeline);
+                _orderNodes.EnqueueBack(timeline);
             }
         }
 
@@ -150,18 +154,19 @@ namespace Aurora.Timeline
         {
             if (node != null)
             {
-                _orderNodes.AddLast(node);
+                _orderNodes.EnqueueBack(node);
             }
         }
 
+        // 感觉不对吧? 不能调用Parallel
         public void Group(TimelineNode node)
         {
             if (node != null)
             {
                 // 为什么是Last? Join是编排方法, 只对Last生效
-                if (_orderNodes.Last != null)
+                if (_orderNodes.TryPeekBack(out ParallelNode last))
                 {
-                    _orderNodes.Last.Value.Parallel(node);
+                    last.Parallel(node);
                 }
                 else
                 {
@@ -190,9 +195,9 @@ namespace Aurora.Timeline
         {
             if (node != null)
             {
-                if (_orderNodes.Last != null)
+                if (_orderNodes.TryPeekBack(out ParallelNode last))
                 {
-                    _orderNodes.Last.Value.Parallel(node);
+                    last.Parallel(node);
                 }
                 else
                 {

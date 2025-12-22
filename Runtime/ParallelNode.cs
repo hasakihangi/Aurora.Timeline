@@ -7,6 +7,14 @@ namespace Aurora.Timeline
     public abstract class ParallelNode
     {
         [SerializeField] protected List<ParallelNode> parallelNodes = new List<ParallelNode>();
+
+        public bool canceled {get; private set; } = false;
+
+        public void Cancel()
+        {
+            canceled = true;
+        }
+
         public bool UpdateParallel(float delta, float rate)
         {
             for (int i = parallelNodes.Count - 1; i >= 0; i--)
