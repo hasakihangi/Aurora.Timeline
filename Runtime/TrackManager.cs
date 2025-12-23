@@ -14,7 +14,6 @@ namespace Aurora.Timeline
             {
                 if (_instance is null)
                 {
-                    // 为_instance赋值之后, 返回
                     _instance = FindObjectOfType<TrackManager>();
 
                     if (_instance is null)
@@ -32,13 +31,13 @@ namespace Aurora.Timeline
 
 
         public List<Track> tracks = new List<Track>();
-        public float m_Rate = 1f;
+        public float _rate = 1f;
 
         private void Update()
         {
             foreach (var track in tracks)
             {
-                track.Update(Time.deltaTime * m_Rate, Time.timeScale * m_Rate);
+                track.Update(Time.deltaTime * _rate, Time.timeScale * _rate);
             }
         }
 

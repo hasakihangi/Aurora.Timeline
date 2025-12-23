@@ -48,22 +48,22 @@ namespace Aurora.Timeline
             order.AddLast(timeline);
         }
 
-        public void Run(TimelineNode node)
-        {
-            if (node == null)
-                return;
-
-            Timeline timeline = Timeline.Get(node);
-            Run(timeline);
-        }
-
-        public void Append(TimelineNode node)
-        {
-            if (node == null)
-                return;
-
-            Timeline timeline = Timeline.Get(node);
-            Append(timeline);
-        }
+        // public void Run(TimelineNode node)
+        // {
+        //     if (node == null)
+        //         return;
+        //
+        //     Timeline timeline = Timeline.Get(node);
+        //     Run(timeline);
+        // }
+        //
+        // public void Append(TimelineNode node)
+        // {
+        //     if (node == null)
+        //         return;
+        //
+        //     Timeline timeline = Timeline.Get(node);
+        //     Append(timeline);
+        // }
     }
 }
