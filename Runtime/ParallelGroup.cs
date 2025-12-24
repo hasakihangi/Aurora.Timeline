@@ -7,9 +7,9 @@ namespace Aurora.Timeline
     [System.Serializable]
     public class ParallelGroup
     {
-        [SerializeField] protected List<IUpdateNode> _parallelNodes = new List<IUpdateNode>();
+        [SerializeField] protected List<IUpdater> _parallelNodes = new List<IUpdater>();
 
-        private ParallelGroup(IUpdateNode node)
+        private ParallelGroup(IUpdater node)
         {
             _parallelNodes.Add(node);
         }
@@ -18,7 +18,7 @@ namespace Aurora.Timeline
         {
             for (int i = _parallelNodes.Count - 1; i >= 0; i--)
             {
-                IUpdateNode current = _parallelNodes[i];
+                IUpdater current = _parallelNodes[i];
                 if (current.Update(delta, rate))
                 {
                     _parallelNodes.RemoveAt(i);
@@ -31,11 +31,11 @@ namespace Aurora.Timeline
             return false;
         }
 
-        public void Parallel(IUpdateNode node)
+        public void Parallel(IUpdater node)
         {
             _parallelNodes.Add(node);
         }
 
-        public static ParallelGroup Get(IUpdateNode node) => new ParallelGroup(node);
+        public static ParallelGroup Get(IUpdater node) => new ParallelGroup(node);
     }
 }

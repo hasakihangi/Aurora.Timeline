@@ -2,7 +2,7 @@ using System;
 
 namespace Aurora.Timeline
 {
-    public struct UpdateNode: IUpdateNode
+    public struct UpdateNode: IUpdater
     {
         public UpdateMethod _method;
         public Action _onDone;

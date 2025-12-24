@@ -6,7 +6,7 @@ namespace Aurora.Timeline
 {
     // 这个只有order可以吗? 如果是parallel
     [Serializable]
-    public class Timeline: IUpdateNode
+    public class Timeline: IUpdater
     {
         private Dequeue<ParallelGroup> _orderNodes = new Dequeue<ParallelGroup>();
 
@@ -39,7 +39,7 @@ namespace Aurora.Timeline
         public bool Complete { private get; set; } = false;
 
 
-        public void Parallel(IUpdateNode node)
+        public void Parallel(IUpdater node)
         {
             if (node != null)
             {
@@ -90,7 +90,7 @@ namespace Aurora.Timeline
         //     }
         // }
 
-        public void Chain(IUpdateNode node)
+        public void Chain(IUpdater node)
         {
             if (node != null)
             {
@@ -138,7 +138,7 @@ namespace Aurora.Timeline
             }
         }
 
-        public void Join(IUpdateNode node)
+        public void Join(IUpdater node)
         {
             if (node != null)
             {
@@ -210,14 +210,14 @@ namespace Aurora.Timeline
             return t;
         }
 
-        public static Timeline Get(IUpdateNode node)
+        public static Timeline Get(IUpdater node)
         {
             Timeline timeline = Get();
             timeline.Chain(node);
             return timeline;
         }
 
-        public static Timeline ArrangeInOrder(IEnumerable<IUpdateNode> nodes)
+        public static Timeline ArrangeInOrder(IEnumerable<IUpdater> nodes)
         {
             Timeline result = Get();
 

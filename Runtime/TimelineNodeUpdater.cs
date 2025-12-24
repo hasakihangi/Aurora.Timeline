@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace Aurora.Timeline
 {
     // 这个跟ParallelGroup不是一个含义, 应该是像执行器一样的东西
-    public class TimelineNodeUpdater: IUpdateNode
+    public class TimelineNodeUpdater: IUpdater
     {
         public List<TimelineNode> _runningNodes = new List<TimelineNode>();
 

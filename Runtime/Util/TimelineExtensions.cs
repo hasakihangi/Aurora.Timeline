@@ -30,7 +30,7 @@ namespace Aurora.Timeline
         }
 
 
-        public static Timeline Append(this Timeline t, IUpdateNode node)
+        public static Timeline Append(this Timeline t, IUpdater node)
         {
             if (t == null)
                 t = Timeline.Get();
@@ -60,7 +60,7 @@ namespace Aurora.Timeline
             return Append(t, node);
         }
 
-        public static Timeline Group(this Timeline t, IUpdateNode node)
+        public static Timeline Group(this Timeline t, IUpdater node)
         {
             t ??= Timeline.Get();
             t.Join(node);
@@ -108,7 +108,7 @@ namespace Aurora.Timeline
         }
 
         //现在需要的是Delay多少秒之后执行一个Timeline
-        public static Timeline DelayGroup(this Timeline t, float seconds, IUpdateNode node)
+        public static Timeline DelayGroup(this Timeline t, float seconds, IUpdater node)
         {
             t ??= Timeline.Get();
 
@@ -142,7 +142,7 @@ namespace Aurora.Timeline
             return t;
         }
 
-        public static Timeline DelayAppend(this Timeline t, float seconds)
+        public static Timeline Delay(this Timeline t, float seconds)
         {
             t ??= Timeline.Get();
 
