@@ -14,8 +14,6 @@ namespace Aurora.Timeline
             TrackManager.Instance.Unregister(track);
         }
 
-        // Append始终是转成TimelineNodeGroup的形式加入
-        // 但是如果是Group呢? 需要一个IParallel的接口? 但是TimelineNodeGroup没办法跟其他IUpdate对象共存
         public static Timeline Append(this Timeline t, TimelineNode node)
         {
             if (t == null)
@@ -30,12 +28,27 @@ namespace Aurora.Timeline
         }
 
 
-        public static Timeline Append(this Timeline t, IUpdater node)
+        public static Timeline Append(this Timeline t, IUpdateNode node)
         {
             if (t == null)
                 t = Timeline.Get();
 
+            if (node == null)
+                return t;
+
             t.Chain(node);
+            return t;
+        }
+
+        public static Timeline AppendContinue(this Timeline t, IUpdateNode node)
+        {
+            if (t == null)
+                t = Timeline.Get();
+
+            if (node == null)
+                return t;
+
+            t.ChainContinue(node);
             return t;
         }
 
@@ -45,25 +58,33 @@ namespace Aurora.Timeline
             return Append(t, node);
         }
 
-        // public static Timeline Append(this Timeline t, params Timeline[] timelines)
-        // {
-        //     if (t == null)
-        //         t = Timeline.Get();
-        //
-        //     t.Chain(timelines);
-        //     return t;
-        // }
-
         public static Timeline Append(this Timeline t, Action onDone)
         {
             UpdateNode node = new UpdateNode(onDone);
             return Append(t, node);
         }
 
-        public static Timeline Group(this Timeline t, IUpdater node)
+        public static Timeline Group(this Timeline t, IUpdateNode node)
         {
-            t ??= Timeline.Get();
+            if (t == null)
+                t = Timeline.Get();
+
+            if (node == null)
+                return t;
+
             t.Join(node);
+            return t;
+        }
+
+        public static Timeline GroupContinue(this Timeline t, IUpdateNode node)
+        {
+            if (t == null)
+                t = Timeline.Get();
+
+            if (node == null)
+                return t;
+
+            t.JoinContinue(node);
             return t;
         }
 
@@ -87,13 +108,6 @@ namespace Aurora.Timeline
         }
 
 
-        // public static TimelineGroupGroup ToNodeGroup(this TimelineNode n)
-        // {
-        //     TimelineGroupGroup groupGroup = TimelineGroupGroup.Get();
-        //     groupGroup.Parallel(n);
-        //     return groupGroup;
-        // }
-
         public static Timeline ToTimeline(this TimelineNode node)
         {
             Timeline timeline = Timeline.Get();
@@ -107,8 +121,7 @@ namespace Aurora.Timeline
             return timeline;
         }
 
-        //现在需要的是Delay多少秒之后执行一个Timeline
-        public static Timeline DelayGroup(this Timeline t, float seconds, IUpdater node)
+        public static Timeline DelayGroup(this Timeline t, float seconds, IUpdateNode node)
         {
             t ??= Timeline.Get();
 
@@ -117,8 +130,6 @@ namespace Aurora.Timeline
 
             Timeline result = Timeline.Get();
 
-            // ? 这个还真得使用TimelineNode才能实现? 不是, 可以用timeline, timeline也是IUpdateNode对象
-            // TimelineNode delayNode = TimelineNode.Delay(seconds);
             UpdateNode delay = UpdateNode.Delay(seconds);
 
             result.Append(delay).Append(node);
@@ -136,9 +147,6 @@ namespace Aurora.Timeline
             TimelineNode delay = TimelineNode.Delay(seconds);
             delay.AddToNext(node);
             t.Group(delay);
-            // TimelineNode node = TimelineNode.Delay(seconds);
-            // node.AddToNext(afterDelay);
-            // t.Group(node);
             return t;
         }
 

@@ -2,7 +2,7 @@ using System;
 
 namespace Aurora.Timeline
 {
-    public struct UpdateNode: IUpdater
+    public struct UpdateNode: IUpdateNode
     {
         public UpdateMethod _method;
         public Action _onDone;
@@ -46,7 +46,7 @@ namespace Aurora.Timeline
         }
 
         public float Rate => _rate;
-        public bool Update(float delta, float rate)
+        public void Update(float delta, float rate)
         {
             delta = delta * _rate;
             bool done = _method == null || _method.Invoke(delta, _elapsed, rate * _rate);
@@ -56,10 +56,12 @@ namespace Aurora.Timeline
             {
                 _onDone?.Invoke();
                 _onDone = null;
+                Complete = true;
             }
-
-            return done;
         }
+
+        public bool Continue => false;
+        public bool Complete {get; private set;}
     }
 
     public delegate bool UpdateMethod(float delta, float elapsed, float rate);

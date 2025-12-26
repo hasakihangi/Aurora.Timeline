@@ -4,193 +4,115 @@ using UnityEngine;
 
 namespace Aurora.Timeline
 {
-    // 这个只有order可以吗? 如果是parallel
     [Serializable]
-    public class Timeline: IUpdater
+    public class Timeline: IUpdateNode
     {
-        private Dequeue<ParallelGroup> _orderNodes = new Dequeue<ParallelGroup>();
+        private List<ParallelGroup> _order = new List<ParallelGroup>();
 
         public float _rate = 1;
         public string _name = string.Empty;
 
-        // 为什么是这样写? 同时更新Parallel和order?
-        public bool Update(float delta, float rate)
+        // public int _index = 0;
+
+        public bool Complete {get; private set; }
+        public bool Continue => _order.Count > 0;
+
+        public void Update(float delta, float rate)
         {
-            if (Complete)
-                return true;
-
-            ParallelGroup group = _orderNodes.PeekFront();
-
-            if (group == null)
-                return true;
-
-            if (group.UpdateParallel(_rate * delta, _rate * rate))
+            for (int i = 0; i < _order.Count; i++)
             {
-                _orderNodes.DequeueFront();
-            }
+                var group = _order[i];
+                group.Update(delta * _rate, rate * _rate);
 
-            if (_orderNodes.Count == 0)
-                return true;
-
-            return false;
-        }
-
-
-        public bool Complete { private get; set; } = false;
-
-
-        public void Parallel(IUpdater node)
-        {
-            if (node != null)
-            {
-                if (_orderNodes.TryPeekFront(out var group))
+                if (group.Complete)
                 {
-                    group.Parallel(node);
+                    if (!group.Continue)
+                    {
+                        _order.RemoveAt(i);
+                        i--;
+                    }
                 }
                 else
                 {
-                    group = ParallelGroup.Get(node);
+                    return;
                 }
             }
+
+            Complete = true;
         }
 
-        // 为什么没有显示t2?
-        // public override string ToString(int level)
-        // {
-        //     string output = new string('\t', level) + "timeline " + $"{_name}" + '\n';
-        //     level++;
-        //     foreach (var orderNode in _orderNodes)
-        //     {
-        //         output += orderNode.ToString(level) + '\n';
-        //     }
-        //     return output;
-        // }
 
-        // public void Parallel(params TimelineNode[] nodes)
-        // {
-        //     TimelineGroupGroup groupGroup = null;
-        //     if (nodes.Length > 0)
-        //     {
-        //         foreach (var node in nodes)
-        //         {
-        //             if (node != null)
-        //             {
-        //                 if (groupGroup == null)
-        //                 {
-        //                     groupGroup = TimelineGroupGroup.Get();
-        //                 }
-        //                 groupGroup.Parallel(node);
-        //             }
-        //         }
-        //     }
-        //
-        //     if (groupGroup != null)
-        //     {
-        //         parallelNodes.Add(groupGroup);
-        //     }
-        // }
-
-        public void Chain(IUpdater node)
+        public void Cancel()
         {
-            if (node != null)
+            _order.Clear();
+        }
+
+
+        public void Parallel(IUpdateNode node)
+        {
+            if (node == null)
+                return;
+
+            if (_order.TryGetValue(0, out var group))
             {
-                ParallelGroup group = ParallelGroup.Get(node);
-                _orderNodes.EnqueueBack(group);
+                group.Parallel(node);
+            }
+            else
+            {
+                Chain(node);
             }
         }
 
-        // public void Chain(IEnumerable<TimelineNode> nodes)
-        // {
-        //     foreach (var node in nodes)
-        //     {
-        //         Chain(node);
-        //     }
-        // }
-
-        // public void Chain(params TimelineNode[] nodes)
-        // {
-        //     Chain(nodes as IEnumerable<TimelineNode>);
-        // }
-
-        // public void Chain(Timeline timeline)
-        // {
-        //     if (timeline != null)
-        //     {
-        //         _orderNodes.EnqueueBack(timeline);
-        //     }
-        // }
-
-        // public void Chain(IEnumerable<Timeline> timelines)
-        // {
-        //     foreach (var line in timelines)
-        //     {
-        //         Chain(line);
-        //     }
-        // }
-
-        // 名字换一下, 常用的应该在拓展方法那里, 拓展方法用Append和Group
-        // 里面用Chain和Join
-        public void Chain(ParallelGroup group)
+        public void Chain(IUpdateNode node)
         {
-            if (group != null)
+            if (node == null)
+                return;
+
+            ParallelGroup group = ParallelGroup.Get();
+            group.Parallel(node);
+            _order.Add(group);
+        }
+
+        public void ChainContinue(IUpdateNode node)
+        {
+            if (node == null)
+                return;
+
+            ParallelGroup group = ParallelGroup.Get();
+            group.ParallelContinue(node);
+            _order.Add(group);
+        }
+
+        public void Join(IUpdateNode node)
+        {
+            if (node == null)
+                return;
+
+            if (_order.Count > 0)
             {
-                _orderNodes.EnqueueBack(group);
+                _order[^1].Parallel(node);
+            }
+            else
+            {
+                Chain(node);
             }
         }
 
-        public void Join(IUpdater node)
+        public void JoinContinue(IUpdateNode node)
         {
-            if (node != null)
+            if (node == null)
+                return;
+
+            if (_order.Count > 0)
             {
-                if (_orderNodes.TryPeekBack(out ParallelGroup last))
-                {
-                    last.Parallel(node);
-                }
-                else
-                {
-                    Chain(node);
-                }
+                _order[^1].ParallelContinue(node);
+            }
+            else
+            {
+                ChainContinue(node);
             }
         }
 
-        // public void Group(IEnumerable<TimelineNode> nodes)
-        // {
-        //     if (nodes == null)
-        //         return;
-        //
-        //     foreach (var node in nodes)
-        //     {
-        //         Group(node);
-        //     }
-        // }
-
-        // public void Group(params TimelineNode[] nodes)
-        // {
-        //     Group(nodes as IEnumerable<TimelineNode>);
-        // }
-
-        // public void Group(ParallelGroup group)
-        // {
-        //     if (group != null)
-        //     {
-        //         if (_orderNodes.TryPeekBack(out ParallelGroup last))
-        //         {
-        //             last.Parallel(group);
-        //         }
-        //         else
-        //         {
-        //             Chain(group);
-        //         }
-        //     }
-        // }
-
-        // public void Group(IEnumerable<Timeline> timelines)
-        // {
-        //     foreach (var timeline in timelines)
-        //     {
-        //         Group(timeline);
-        //     }
-        // }
 
         public static Timeline Nothing => Get();
 
@@ -210,14 +132,14 @@ namespace Aurora.Timeline
             return t;
         }
 
-        public static Timeline Get(IUpdater node)
+        public static Timeline Get(IUpdateNode node)
         {
             Timeline timeline = Get();
             timeline.Chain(node);
             return timeline;
         }
 
-        public static Timeline ArrangeInOrder(IEnumerable<IUpdater> nodes)
+        public static Timeline ArrangeInOrder(IEnumerable<IUpdateNode> nodes)
         {
             Timeline result = Get();
 
