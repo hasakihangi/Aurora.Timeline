@@ -62,12 +62,12 @@ public class TestTimeline : MonoBehaviour
         Timeline timeline = Timeline.Get();
         Timeline t0 = Test0();
         Timeline t0_continue = Timeline.Get().Delay(2f).Append(() => Debug.Log("test0 continue"));
-        t0.AppendContinue(t0_continue);
+        t0.AppendContinue(t0_continue); // 在t0之后执行一些后续的continue, 但是不影响它的complete
 
         Timeline t1 = Timeline.Get();
-        t1.Delay(3f).Append(() => Debug.Log("test1 complete!"));
+        t1.Append(() => Debug.Log("test1 start")).Delay(3f).Append(() => Debug.Log("test1 complete!"));
 
-        timeline.Append(t0).Append(t1);
+        timeline.Append(t0).Append(t1); // t1将在t0的complete之后执行
         return timeline;
     }
 }
