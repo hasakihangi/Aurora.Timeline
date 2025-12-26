@@ -3,11 +3,11 @@ using System.Collections;
 
 namespace Aurora.Timeline
 {
-    public class EnumeratorUpdateNode: IUpdateNode
+    public class EnumeratorUpdater: IUpdateNode
     {
         public IEnumerator _enumerator;
 
-        public EnumeratorUpdateNode(IEnumerator enumerator)
+        public EnumeratorUpdater(IEnumerator enumerator)
         {
             _enumerator = enumerator;
         }
