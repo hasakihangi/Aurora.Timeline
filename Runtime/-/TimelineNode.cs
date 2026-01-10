@@ -24,7 +24,7 @@ namespace Aurora.Timeline.Deprecated
 
         public bool IsMatchTag(string tag)
         {
-            return Utils.Contains(_tags, tag);
+            return BaseUtils.Contains(_tags, tag);
         }
 
         public bool Update(float delta, float rate)

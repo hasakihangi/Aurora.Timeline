@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Aurora.Timeline
 {
-    internal static class Extensions
+    internal static class BaseExtensions
     {
         public static bool TryGetValue<T>(this List<T> list, int index, out T value)
         {

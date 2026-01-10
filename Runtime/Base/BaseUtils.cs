@@ -2,7 +2,7 @@ using System;
 using System.Linq;
 
 
-internal static class Utils
+internal static class BaseUtils
 {
     public static bool ContainsAny<T>(T[] array, T[] items)
     {

@@ -4,29 +4,29 @@ using UnityEngine;
 
 namespace Aurora.Timeline
 {
-    public class TrackManager: MonoBehaviour
+    internal class TrackManager: SingletonBehaviour<TrackManager>
     {
-        private static TrackManager _instance;
-
-        public static TrackManager Instance
-        {
-            get
-            {
-                if (_instance is null)
-                {
-                    _instance = FindObjectOfType<TrackManager>();
-
-                    if (_instance is null)
-                    {
-                        GameObject obj = new GameObject("TrackManager");
-                        _instance = obj.AddComponent<TrackManager>();
-                        DontDestroyOnLoad(obj);
-                    }
-                }
-
-                return _instance;
-            }
-        }
+        // private static TrackManager _instance;
+        //
+        // public static TrackManager Instance
+        // {
+        //     get
+        //     {
+        //         if (_instance is null)
+        //         {
+        //             _instance = FindObjectOfType<TrackManager>();
+        //
+        //             if (_instance is null)
+        //             {
+        //                 GameObject obj = new GameObject("TrackManager");
+        //                 _instance = obj.AddComponent<TrackManager>();
+        //                 DontDestroyOnLoad(obj);
+        //             }
+        //         }
+        //
+        //         return _instance;
+        //     }
+        // }
 
 
 
