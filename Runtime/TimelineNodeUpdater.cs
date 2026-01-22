@@ -8,8 +8,8 @@ namespace Aurora.Timeline
     {
         public List<TimelineNode> _runningNodes = new List<TimelineNode>();
 
-        public bool Continue => false;
-        public bool Complete => _runningNodes.Count == 0;
+        public bool Finished => false;
+        public bool Completed => _runningNodes.Count == 0;
 
         public void Update(float delta, float rate)
         {
@@ -17,7 +17,7 @@ namespace Aurora.Timeline
             {
                 TimelineNode current = _runningNodes[i];
                 current.updateNode.Update(delta, rate);
-                if (current.updateNode.Complete)
+                if (current.updateNode.Completed)
                 {
                     _runningNodes.RemoveAt(i);
                     if (current._next.Count > 0)

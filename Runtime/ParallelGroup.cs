@@ -8,50 +8,60 @@ namespace Aurora.Timeline
     [System.Serializable]
     public class ParallelGroup
     {
-        private List<IUpdateNode> _groupNodes = new List<IUpdateNode>();
-        private List<IUpdateNode> _continueNodes = new List<IUpdateNode>();
+        private List<IUpdateNode> _nodes = new List<IUpdateNode>();
+        // private List<IUpdateNode> _continueNodes = new List<IUpdateNode>();
 
         public void Parallel(IUpdateNode node)
         {
-            _groupNodes.Add(node);
+            _nodes.Add(node);
         }
 
-        public void ParallelContinue(IUpdateNode node)
+        // ? IUpdateNode自身会决定是否continue
+        // public void ParallelContinue(IUpdateNode node)
+        // {
+        //     _continueNodes.Add(node);
+        // }
+
+        public bool Completed
         {
-            _continueNodes.Add(node);
+            get
+            {
+                foreach (var node in _nodes)
+                {
+                    if (!node.Completed)
+                        return false;
+                }
+
+                return true;
+            }
         }
 
-        public bool Complete => _groupNodes.Count == 0;
-        public bool Continue => _continueNodes.Count > 0;
+        public bool Finished => _nodes.Count == 0;
 
 
         public void Update(float delta, float rate)
         {
-            for (int i = 0; i < _groupNodes.Count; i++)
+            for (int i = 0; i < _nodes.Count; i++)
             {
-                IUpdateNode current = _groupNodes[i];
+                IUpdateNode current = _nodes[i];
                 current.Update(delta, rate);
-                if (current.Complete)
+                if (current.Finished)
                 {
-                    _groupNodes.RemoveAt(i);
+                    _nodes.RemoveAt(i);
                     i--;
-                    if (current.Continue)
-                    {
-                        _continueNodes.Add(current);
-                    }
                 }
             }
 
-            for (int i = 0; i < _continueNodes.Count; i++)
-            {
-                IUpdateNode current = _continueNodes[i];
-                current.Update(delta, rate);
-                if (!current.Continue)
-                {
-                    _continueNodes.RemoveAt(i);
-                    i --;
-                }
-            }
+            // for (int i = 0; i < _continueNodes.Count; i++)
+            // {
+            //     IUpdateNode current = _continueNodes[i];
+            //     current.Update(delta, rate);
+            //     if (!current.Finished)
+            //     {
+            //         _continueNodes.RemoveAt(i);
+            //         i --;
+            //     }
+            // }
         }
 
 

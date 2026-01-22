@@ -19,9 +19,9 @@ namespace Aurora.Timeline
                 Timeline current = running[i];
                 current.Update(_rate * delta, _rate * rate);
 
-                if (current.Complete)
+                if (current.Completed)
                 {
-                    if (!current.Continue)
+                    if (!current.Finished)
                     {
                         running.RemoveAt(i);
                     }

@@ -40,17 +40,17 @@ namespace Aurora.Timeline
             return t;
         }
 
-        public static Timeline AppendContinue(this Timeline t, IUpdateNode node)
-        {
-            if (t == null)
-                t = Timeline.Get();
-
-            if (node == null)
-                return t;
-
-            t.ChainContinue(node);
-            return t;
-        }
+        // public static Timeline AppendContinue(this Timeline t, IUpdateNode node)
+        // {
+        //     if (t == null)
+        //         t = Timeline.Get();
+        //
+        //     if (node == null)
+        //         return t;
+        //
+        //     t.ChainContinue(node);
+        //     return t;
+        // }
 
         public static Timeline Append(this Timeline t, UpdateMethod method)
         {
@@ -76,17 +76,17 @@ namespace Aurora.Timeline
             return t;
         }
 
-        public static Timeline GroupContinue(this Timeline t, IUpdateNode node)
-        {
-            if (t == null)
-                t = Timeline.Get();
-
-            if (node == null)
-                return t;
-
-            t.JoinContinue(node);
-            return t;
-        }
+        // public static Timeline GroupContinue(this Timeline t, IUpdateNode node)
+        // {
+        //     if (t == null)
+        //         t = Timeline.Get();
+        //
+        //     if (node == null)
+        //         return t;
+        //
+        //     t.JoinContinue(node);
+        //     return t;
+        // }
 
         public static Timeline Group(this Timeline t, Action onDone)
         {
@@ -121,41 +121,43 @@ namespace Aurora.Timeline
             return timeline;
         }
 
-        public static Timeline DelayGroup(this Timeline t, float seconds, IUpdateNode node)
-        {
-            t ??= Timeline.Get();
+        // 这里是在干什么?
+        // 最好是Timeline提供这个Delay方法, 然后再Group
+        // public static Timeline DelayGroup(this Timeline t, float seconds, IUpdateNode node)
+        // {
+        //     t ??= Timeline.Get();
+        //
+        //     if (node == null)
+        //         return t;
+        //
+        //     Timeline result = Timeline.Get();
+        //
+        //     UpdateNode delay = UpdateNode.DelayNode(seconds);
+        //
+        //     result.Append(delay).Append(node);
+        //     t.Join(node); // 有问题吧?
+        //     return t;
+        // }
+        //
+        // public static Timeline DelayGroup(this Timeline t, float seconds, TimelineNode node)
+        // {
+        //     t ??= Timeline.Get();
+        //
+        //     if (node == null)
+        //         return t;
+        //
+        //     TimelineNode delay = TimelineNode.Delay(seconds);
+        //     delay.AddToNext(node);
+        //     t.Group(delay);
+        //     return t;
+        // }
 
-            if (node == null)
-                return t;
-
-            Timeline result = Timeline.Get();
-
-            UpdateNode delay = UpdateNode.Delay(seconds);
-
-            result.Append(delay).Append(node);
-            t.Join(node);
-            return t;
-        }
-
-        public static Timeline DelayGroup(this Timeline t, float seconds, TimelineNode node)
-        {
-            t ??= Timeline.Get();
-
-            if (node == null)
-                return t;
-
-            TimelineNode delay = TimelineNode.Delay(seconds);
-            delay.AddToNext(node);
-            t.Group(delay);
-            return t;
-        }
-
-        public static Timeline Delay(this Timeline t, float seconds)
-        {
-            t ??= Timeline.Get();
-
-            TimelineNode node = TimelineNode.Delay(seconds);
-            return t.Append(node);
-        }
+        // public static Timeline Delay(this Timeline t, float seconds)
+        // {
+        //     t ??= Timeline.Get();
+        //
+        //     TimelineNode node = TimelineNode.Delay(seconds);
+        //     return t.Append(node);
+        // }
     }
 }

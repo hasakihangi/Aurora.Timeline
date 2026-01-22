@@ -5,7 +5,7 @@ namespace Aurora.Timeline
 {
     public class EnumeratorUpdater: IUpdateNode
     {
-        public IEnumerator _enumerator;
+        private IEnumerator _enumerator;
 
         public EnumeratorUpdater(IEnumerator enumerator)
         {
@@ -15,10 +15,10 @@ namespace Aurora.Timeline
         public void Update(float delta, float rate)
         {
             bool next = _enumerator.MoveNext();
-            Complete = !next;
+            Completed = !next;
         }
 
-        public bool Complete { get; private set; }
-        public bool Continue => false;
+        public bool Completed { get; private set; }
+        public bool Finished => Completed;
     }
 }

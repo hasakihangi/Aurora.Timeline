@@ -4,64 +4,64 @@ namespace Aurora.Timeline
 {
     public struct UpdateNode: IUpdateNode
     {
-        public UpdateMethod _method;
-        public Action _onDone;
-        public float _elapsed;
-        public float _rate;
+        public UpdateMethod method;
+        public Action onCompleted;
+        public float rate;
 
+        private float _elapsed;
         public UpdateNode(UpdateMethod method): this()
         {
-            _method = method;
-            _onDone = null;
-            _rate = 1;
+            this.method = method;
+            onCompleted = null;
+            rate = 1;
             _elapsed = 0;
         }
 
         public UpdateNode(Action onDone): this()
         {
-            _method = null;
-            _onDone = onDone;
-            _rate = 1;
+            method = null;
+            this.onCompleted = onDone;
+            rate = 1;
             _elapsed = 0;
         }
 
-        public static UpdateNode Action(Action action) => new UpdateNode((delta, elapsed, rate) =>
+        public static UpdateNode ActionNode(Action action) => new UpdateNode((delta, elapsed, rate) =>
         {
             action?.Invoke();
             return true;
         });
 
-        public static UpdateNode Done(Action onDone) => new UpdateNode(onDone);
+        public static UpdateNode DoneNode(Action onDone) => new UpdateNode(onDone);
 
-        public static UpdateNode Delay(float seconds) => new UpdateNode((delta, elapsed, rate) =>
+        public static UpdateNode DelayNode(float seconds) => new UpdateNode((delta, elapsed, rate) =>
         {
             return elapsed >= seconds;
         });
 
         public static UpdateNode Delay(float seconds, Action onDone)
         {
-            UpdateNode node = Delay(seconds);
-            node._onDone = onDone;
+            UpdateNode node = DelayNode(seconds);
+            node.onCompleted = onDone;
             return node;
         }
 
-        public float Rate => _rate;
         public void Update(float delta, float rate)
         {
-            delta = delta * _rate;
-            bool done = _method == null || _method.Invoke(delta, _elapsed, rate * _rate);
+            delta = delta * this.rate;
+            rate = rate * this.rate;
+            bool done = method == null || method.Invoke(delta, _elapsed, rate);
             _elapsed += delta;
 
             if (done)
             {
-                _onDone?.Invoke();
-                _onDone = null;
-                Complete = true;
+                onCompleted?.Invoke();
+                onCompleted = null;
+                Completed = true;
             }
         }
 
-        public bool Continue => false;
-        public bool Complete {get; private set;}
+        public bool Finished => Completed;
+        public bool Completed {get; private set;}
     }
 
     public delegate bool UpdateMethod(float delta, float elapsed, float rate);

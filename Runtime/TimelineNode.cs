@@ -3,8 +3,6 @@ using System.Collections.Generic;
 
 namespace Aurora.Timeline
 {
-    // 提供跟之前相同的方法相同
-    // 但是直接Append一个Action跟之前是不一样的
     public class TimelineNode
     {
         public UpdateNode updateNode;
@@ -22,8 +20,8 @@ namespace Aurora.Timeline
 
         public Action OnComplete
         {
-            get => updateNode._onDone;
-            set => updateNode._onDone = value;
+            get => updateNode.onCompleted;
+            set => updateNode.onCompleted = value;
         }
 
         public void AddToNext(TimelineNode node)
@@ -35,13 +33,13 @@ namespace Aurora.Timeline
         }
 
         public static TimelineNode Nothing => new TimelineNode();
-        public static TimelineNode Action(Action action) => new TimelineNode(UpdateNode.Action(action));
-        public static TimelineNode Done(Action onDone) => new TimelineNode(UpdateNode.Done(onDone));
-        public static TimelineNode Delay(float seconds) => new TimelineNode(UpdateNode.Delay(seconds));
+        public static TimelineNode Action(Action action) => new TimelineNode(UpdateNode.ActionNode(action));
+        public static TimelineNode Done(Action onDone) => new TimelineNode(UpdateNode.DoneNode(onDone));
+        public static TimelineNode Delay(float seconds) => new TimelineNode(UpdateNode.DelayNode(seconds));
 
         public static TimelineNode Delay(float seconds, Action onDone)
         {
-            TimelineNode n = new TimelineNode(UpdateNode.Delay(seconds));
+            TimelineNode n = new TimelineNode(UpdateNode.DelayNode(seconds));
             n.OnComplete = onDone;
             return n;
         }

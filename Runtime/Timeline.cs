@@ -9,24 +9,23 @@ namespace Aurora.Timeline
     {
         private List<ParallelGroup> _order = new List<ParallelGroup>();
 
-        public float _rate = 1;
-        public string _name = string.Empty;
+        public float rate = 1;
+        public string name = string.Empty;
 
-        // public int _index = 0;
 
-        public bool Complete {get; private set; }
-        public bool Continue => _order.Count > 0;
+        public bool Completed {get; private set; }
+        public bool Finished => _order.Count == 0;
 
         public void Update(float delta, float rate)
         {
             for (int i = 0; i < _order.Count; i++)
             {
                 var group = _order[i];
-                group.Update(delta * _rate, rate * _rate);
+                group.Update(delta * this.rate, rate * this.rate);
 
-                if (group.Complete)
+                if (group.Completed)
                 {
-                    if (!group.Continue)
+                    if (group.Finished)
                     {
                         _order.RemoveAt(i);
                         i--;
@@ -38,7 +37,7 @@ namespace Aurora.Timeline
                 }
             }
 
-            Complete = true;
+            Completed = true;
         }
 
 
@@ -73,15 +72,15 @@ namespace Aurora.Timeline
             _order.Add(group);
         }
 
-        public void ChainContinue(IUpdateNode node)
-        {
-            if (node == null)
-                return;
-
-            ParallelGroup group = ParallelGroup.Get();
-            group.ParallelContinue(node);
-            _order.Add(group);
-        }
+        // public void ChainContinue(IUpdateNode node)
+        // {
+        //     if (node == null)
+        //         return;
+        //
+        //     ParallelGroup group = ParallelGroup.Get();
+        //     group.ParallelContinue(node);
+        //     _order.Add(group);
+        // }
 
         public void Join(IUpdateNode node)
         {
@@ -98,20 +97,20 @@ namespace Aurora.Timeline
             }
         }
 
-        public void JoinContinue(IUpdateNode node)
-        {
-            if (node == null)
-                return;
-
-            if (_order.Count > 0)
-            {
-                _order[^1].ParallelContinue(node);
-            }
-            else
-            {
-                ChainContinue(node);
-            }
-        }
+        // public void JoinContinue(IUpdateNode node)
+        // {
+        //     if (node == null)
+        //         return;
+        //
+        //     if (_order.Count > 0)
+        //     {
+        //         _order[^1].ParallelContinue(node);
+        //     }
+        //     else
+        //     {
+        //         ChainContinue(node);
+        //     }
+        // }
 
 
         public static Timeline Nothing => Get();
@@ -127,7 +126,7 @@ namespace Aurora.Timeline
         {
             var t = new Timeline
             {
-                _name = name
+                name = name
             };
             return t;
         }
@@ -157,6 +156,13 @@ namespace Aurora.Timeline
         public static Timeline ArrangeInOrder(params Timeline[] nodes)
         {
             return ArrangeInOrder(nodes as IEnumerable<Timeline>);
+        }
+
+        public static Timeline Delay(float seconds, IUpdateNode node)
+        {
+            Timeline timeline = Timeline.Get();
+            IUpdateNode delayNode = UpdateNode.DelayNode(seconds);
+            return timeline.Append(delayNode).Append(node);
         }
     }
 }
